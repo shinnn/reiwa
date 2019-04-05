@@ -1,0 +1,152 @@
+'use strict';
+
+const {join} = require('path');
+const originalExecFile = require('child_process').execFile;
+const {types: {isNativeError}, promisify} = require('util');
+
+const attempt = require('lodash/attempt');
+const test = require('tape');
+
+const execFile = promisify(originalExecFile);
+const [node] = process.argv;
+const reiwa = require.resolve(join(__dirname, require('./package.json').bin));
+
+test('A `reiwa` command', async t => {
+	if (process.platform !== 'linux' && process.platform !== 'darwin') {
+		t.comment('The test cannot be run on this system as libfaketime only supports Linux and macOS.');
+		t.end();
+
+		return;
+	}
+
+	t.plan(8);
+
+	const env = {...process.env};
+
+	if (process.platform === 'linux') {
+		env.LD_PRELOAD = (await execFile('dpkg', ['--listfiles', 'libfaketime'])).stdout.trim().split('\n').pop();
+	} else {
+		env.DYLD_FORCE_FLAT_NAMESPACE = '1';
+		env.DYLD_INSERT_LIBRARIES = `${(await execFile('brew', ['--prefix', 'libfaketime'])).stdout.trim()}/lib/faketime/libfaketime.1.dylib`;
+	}
+
+	if (!isNativeError(attempt(require.resolve, 'full-icu'))) {
+		env.NODE_ICU_DATA = join(__dirname, 'node_modules', 'full-icu');
+	}
+
+	/*
+	try {
+		await execFile(node, [reiwa], {
+			env: {
+				...env,
+				FAKETIME: '2019-05-06 07:08:09'
+			}
+		});
+		t.fail('Unexpectedly succeeded.');
+	} catch ({stdout}) {
+		t.equal(
+			stdout,
+			'1\n',
+			'should print the current year in the Reiwa period.'
+		);
+	}
+	*/
+
+	(async () => {
+		try {
+			await execFile(node, [reiwa], {
+				env: {
+					...env,
+					FAKETIME: '2019-01-01 00:00:00'
+				}
+			});
+			t.fail('Unexpectedly succeeded.');
+		} catch ({code, stderr, stdout}) {
+			t.equal(
+				stdout,
+				'The current Japanese period is not 令和 but 平成.\n',
+				'should print no year when it\'s not the Reiwa period.'
+			);
+
+			t.equal(
+				stderr,
+				'',
+				'should write nothing to the stderr even when it\'s not the Reiwa period.'
+			);
+
+			t.equal(
+				code,
+				19,
+				'should exit with code 19 when it\'s not the Reiwa period.'
+			);
+		}
+	})();
+
+	(async () => {
+		try {
+			await execFile(node, [reiwa, '--unknown'], {
+				env: {
+					...env,
+					FAKETIME: '1980-01-02 03:04:05'
+				}
+			});
+			t.fail('Unexpectedly succeeded.');
+		} catch ({stderr, stdout}) {
+			t.ok(
+				stdout.endsWith('but 昭和.\n'),
+				'should print the current period when it\'s not the Reiwa period.'
+			);
+
+			t.equal(
+				stderr,
+				'(This program just shows the current year in the Reiwa era and has no available command-line flags. The provided argument \'--unknown\' is ignored.)\n',
+				'should show a warning when an extra flag is provided.'
+			);
+		}
+	})();
+
+	(async () => {
+		try {
+			if (process.env.TRAVIS) {
+				await execFile(node, [reiwa], {
+					env: {
+						...env,
+						NODE_ICU_DATA: ''
+					}
+				});
+			} else {
+				await execFile('docker', ['pull', 'node:alpine']);
+				await execFile('docker', [
+					'run',
+					'--rm',
+					`--volume=${__dirname}:${__dirname}`,
+					`--workdir=${__dirname}`,
+					'node:alpine',
+					require.resolve('./node_modules/.bin/nyc'),
+					'--clean=0',
+					'--silent',
+					reiwa
+				]);
+			}
+
+			t.fail('Unexpectedly succeeded.');
+		} catch ({code, stderr, stdout}) {
+			t.equal(
+				code,
+				1,
+				'should exit with a fatal signal.'
+			);
+
+			t.ok(
+				stderr.startsWith('Node.js currently running doesn\'t support Japanese date localization'),
+				'should promote ICU installation.'
+			);
+
+			t.equal(
+				stdout,
+				'',
+				'should write nothing to the stdout.'
+			);
+		}
+	})();
+});
