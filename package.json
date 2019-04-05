@@ -1,0 +1,41 @@
+{
+	"name": "reiwa",
+	"version": "0.1.0",
+	"description": "A command-line tool to show the current year in the Reiwa period",
+	"repository": "shinnn/reiwa",
+	"author": "Shinnosuke Watanabe (https://github.com/shinnn)",
+	"scripts": {
+		"pretest": "eslint .",
+		"test": "nyc node test.js"
+	},
+	"license": "ISC",
+	"files": [
+		"index.js"
+	],
+	"bin": "index.js",
+	"keywords": [
+		"reiwa",
+		"japan",
+		"japanese",
+		"era",
+		"period",
+		"year",
+		"beautiful",
+		"harmony",
+		"command",
+		"cli"
+	],
+	"devDependencies": {
+		"@shinnn/eslint-config": "^6.10.0",
+		"eslint": "^5.16.0",
+		"nyc": "^13.3.0",
+		"nyc-config-common": "^1.0.1",
+		"tape": "^4.10.1"
+	},
+	"eslintConfig": {
+		"extends": "@shinnn"
+	},
+	"nyc": {
+		"extends": "nyc-config-common"
+	}
+}
