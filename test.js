@@ -34,21 +34,27 @@ test('A `reiwa` command', async t => {
 	} catch {}
 
 	/*
-	try {
-		await execFile(node, [reiwa], {
+	(async () => {
+		const {stderr, stdout} = await execFile(node, [reiwa], {
 			env: {
 				...env,
-				FAKETIME: '2019-05-06 07:08:09'
+				FAKETIME: '2019-05-01 00:00:00',
+				TZ: 'Asia/Tokyo'
 			}
 		});
-		t.fail('Unexpectedly succeeded.');
-	} catch ({stdout}) {
+
 		t.equal(
 			stdout,
 			'1\n',
 			'should print the current year in the Reiwa period.'
 		);
-	}
+
+		t.equal(
+			stderr,
+			'',
+			'should write nothing to the stderr even when there is no problem.'
+		);
+	})();
 	*/
 
 	(async () => {
@@ -56,7 +62,9 @@ test('A `reiwa` command', async t => {
 			await execFile(node, [reiwa], {
 				env: {
 					...env,
-					FAKETIME: '2019-01-01 00:00:00'
+					FAKETIME: '2019-05-01 00:00:00',
+					// PGT (Papua New Guinea Time): UTC+10:00
+					TZ: 'Pacific/Port_Moresby'
 				}
 			});
 			t.fail('Unexpectedly succeeded.');
@@ -86,7 +94,9 @@ test('A `reiwa` command', async t => {
 			await execFile(node, [reiwa, '--unknown'], {
 				env: {
 					...env,
-					FAKETIME: '1980-01-02 03:04:05'
+					FAKETIME: '1989-01-08 00:00:00',
+					// PGT (Papua New Guinea Time): UTC+10:00
+					TZ: 'Pacific/Port_Moresby'
 				}
 			});
 			t.fail('Unexpectedly succeeded.');

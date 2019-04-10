@@ -8,7 +8,8 @@ if (!new Intl.DateTimeFormat('ja-JP-u-ca-japanese', {era: 'long'}).format(new Da
 
 const parts = new Map(new Intl.DateTimeFormat('ja-JP-u-ca-japanese', {
 	era: 'long',
-	year: 'numeric'
+	year: 'numeric',
+	timeZone: 'Asia/Tokyo'
 }).formatToParts().map(({type, value}) => [type, value]));
 
 if (process.argv.length > 2) {

@@ -11,8 +11,11 @@ A command-line tool to show the current year in the new Japanese period [令和 
 Make sure you have [install](https://nodejs.org/en/download/)ed [Node.js](https://nodejs.org/), and run this tool with `npx`:
 
 ```console
-$ npx -q reiwa
-> The current Japanese period is not 令和 but 平成.
+$ npx -q reiwa # at May 1, 2019 in JST (the Japan Standard Time)
+1
+
+$ npx -q reiwa # at April 30, 2019 in JST
+The current Japanese period is not 令和 but 平成.
 ```
 
 ## License
