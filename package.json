@@ -1,6 +1,6 @@
 {
 	"name": "reiwa",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "A command-line tool to show the current year in the Reiwa period",
 	"repository": "shinnn/reiwa",
 	"author": "Shinnosuke Watanabe (https://github.com/shinnn)",
