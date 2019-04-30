@@ -65,7 +65,7 @@ test('The `reiwa` command', async t => {
 			t.equal(
 				code,
 				9,
-				'should exit with code 9.'
+				'should exit with code 9 when an extra flag is provided.'
 			);
 		}
 	})();
@@ -89,7 +89,7 @@ test('The `reiwa` command', async t => {
 
 			t.equal(
 				stderr,
-				'(This program just shows the current year in the Reiwa era and doesn\'t have any options. The provided arguments \'--unknown0\', \'--unknown1\' are ignored.)\n',
+				'(This program just shows the current year in the Reiwa era and doesn\'t have any options. The provided arguments \'--unknown0\' and \'--unknown1\' are ignored.)\n',
 				'should show a warning when extra flags are provided.'
 			);
 

@@ -17,7 +17,7 @@ const formatter = new Intl.DateTimeFormat('en-US-u-ca-japanese', {
 const reiwaDateExample = new Date(2020, 0);
 
 if (formatter.formatToParts(reiwaDateExample).find(isEra).value !== 'R') {
-	console.error(`Node.js currently running doesn't support the Reiwa era. In order for this program to work, try the following slutions step by step.
+	console.error(`Node.js currently running doesn't support the Reiwa era. In order for this program to work, try the following solutions step by step.
 
 1. Install the latest version of Node.js.
 2. Install the latest Japanese era localization data, mostly by upgrading the current operating system. If the system is up to date, wait for the OS vendor to include the latest localization data to the system.
@@ -31,7 +31,7 @@ Read https://nodejs.org/api/intl.html for more details about internationalizatio
 
 		console.error(
 			'(This program just shows the current year in the Reiwa era and doesn\'t have any options. The provided argument%s %s %s ignored.)',
-			...process.argv.length === 3 ? ['', inspect(process.argv[2]), 'is'] : ['s', inspect(process.argv.slice(2), {breakLength: Infinity}).replace(/^\[ | \]$/ug, ''), 'are']
+			...process.argv.length === 3 ? ['', inspect(process.argv[2]), 'is'] : ['s', new Intl.ListFormat('en').format(process.argv.slice(2).map(arg => inspect(arg))), 'are']
 		);
 
 		process.exitCode = 9;
