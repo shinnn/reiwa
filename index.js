@@ -1,31 +1,54 @@
 #!/usr/bin/env node
 'use strict';
 
-if (!new Intl.DateTimeFormat('ja-JP-u-ca-japanese', {era: 'long'}).format(new Date(0)).startsWith('昭和')) {
-	console.error('Node.js currently running doesn\'t support Japanese date localization. In order for this program to work, install Japanese ICU to the operating system or build Node.js with embedding the ICU and use it. Read https://nodejs.org/api/intl.html for more details about internationalization in Node.js.');
-	process.exit(1);
+function isEra({type}) {
+	return type === 'era';
 }
 
-const parts = new Map(new Intl.DateTimeFormat('ja-JP-u-ca-japanese', {
-	era: 'long',
-	year: 'numeric',
-	timeZone: 'Asia/Tokyo'
-}).formatToParts().map(({type, value}) => [type, value]));
-
-if (process.argv.length > 2) {
-	const {inspect} = require('util');
-
-	console.error(
-		'(This program just shows the current year in the Reiwa era and has no available command-line flags. The provided argument%s %s %s ignored.)',
-		...process.argv.length === 3 ? ['', inspect(process.argv[2]), 'is'] : ['s', inspect(process.argv.slice(2), {breakLength: Infinity}).replace(/^\[ (?<args>.*) \]$/u, '$<args>'), 'are']
-	);
-
-	process.exitCode = 9;
+function isYear({type}) {
+	return type === 'year';
 }
 
-if (parts.get('era') !== '令和') {
-	console.log(`The current Japanese period is not 令和 but ${parts.get('era')}.`);
-	process.exit(19);
-}
+const formatter = new Intl.DateTimeFormat('en-US-u-ca-japanese', {
+	timeZone: 'Asia/Tokyo',
+	era: 'narrow',
+	year: 'numeric'
+});
+const reiwaDateExample = new Date(2020, 0);
 
-console.log(parts.get('year'));
+if (formatter.formatToParts(reiwaDateExample).find(isEra).value !== 'R') {
+	console.error(`Node.js currently running doesn't support the Reiwa era. In order for this program to work, try the following slutions step by step.
+
+1. Install the latest version of Node.js.
+2. Install the latest Japanese era localization data, mostly by upgrading the current operating system. If the system is up to date, wait for the OS vendor to include the latest localization data to the system.
+3. If both 1. and 2. don't work, install the latest version of ICU http://userguide.icu-project.org/ and provide it to Node.js at runtime via --icu-data-dir or NODE_ICU_DATA.
+
+Read https://nodejs.org/api/intl.html for more details about internationalization in Node.js.`);
+	process.exitCode = 1;
+} else {
+	if (process.argv.length > 2) {
+		const {inspect} = require('util');
+
+		console.error(
+			'(This program just shows the current year in the Reiwa era and doesn\'t have any options. The provided argument%s %s %s ignored.)',
+			...process.argv.length === 3 ? ['', inspect(process.argv[2]), 'is'] : ['s', inspect(process.argv.slice(2), {breakLength: Infinity}).replace(/^\[ | \]$/ug, ''), 'are']
+		);
+
+		process.exitCode = 9;
+	}
+
+	const parts = formatter.formatToParts();
+	const era = parts.find(isEra).value;
+
+	if (era !== 'R') {
+		const longEraFormatter = new Intl.DateTimeFormat(['ja-JP-u-ca-japanese', 'en-US-u-ca-japanese'], {
+			timeZone: 'Asia/Tokyo',
+			era: 'long'
+		});
+
+		console.log(`The current Japanese era is not ${longEraFormatter.formatToParts(reiwaDateExample).find(isEra).value} but ${longEraFormatter.formatToParts().find(isEra).value}.`);
+		process.exitCode = 19;
+	} else {
+		console.log(parts.find(isYear).value);
+	}
+}
