@@ -6,17 +6,14 @@
 
 A command-line tool to show the current year in the new Japanese era [令和 (Reiwa)](https://japan.kantei.go.jp/98_abe/statement/201904/_00001.html)
 
+```console
+$ npx -q reiwa
+1
+```
+
 ## Usage
 
-Make sure you have [install](https://nodejs.org/en/download/)ed [Node.js](https://nodejs.org/), and run `npx reiwa`:
-
-```console
-$ npx -q reiwa # at May 1, 2019 in JST (the Japan Standard Time)
-1
-
-$ npx -q reiwa # at April 30, 2019 in JST
-The current Japanese era is not 令和 but 平成.
-```
+Make sure you have [install](https://nodejs.org/en/download/)ed [Node.js](https://nodejs.org/), and run `npx reiwa`. There is no need to [install](https://docs.npmjs.com/cli/install) this package beforehand.
 
 ## License
 
